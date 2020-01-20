@@ -1,0 +1,28 @@
+export("gsl_bw_mise_cdf")
+export("gsl_bw_mise_gaussian")
+export("RandIndex")
+export("gamma_kpdf")
+export("RIG_kcdf")
+export("gamma_kcdf")
+export("gaussian_kcdf")
+export("kcdf")
+export("generalized.overlap")
+export("KNOBSynC")
+export("kmeans.all")
+export("overlap.map")
+export("norm.res")
+export("kmH")
+
+import(abind)
+import(doMC)
+import(foreach)
+import(parallel)
+
+importFrom("graphics", "axis", "frame", "image", "layout", "lines",
+             "par", "plot.new", "plot.window", "rect", "text")
+importFrom("stats", "aggregate", "cutree", "dist", "hclust", "kmeans",
+             "median")
+importFrom("grDevices", "dev.copy2pdf", "dev.off")
+importFrom("stats", "as.dist", "heatmap", "pchisq", "pnorm", "sd")
+
+useDynLib(SynClustR, .registration = TRUE, .fixes= "C_")

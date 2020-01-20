@@ -1,0 +1,12 @@
+The RKNOBSynC R package is a package that use some of the GSL C library (note capitalization).
+
+Installing gsl from source requires you to download and install GSL
+first.  Ensure that you can compile and run a simple test program such
+as the example program near the start of the gsl Reference Manual.
+
+Some linux users report that is is possible to go to the Ubuntu
+Software Center and install "GNU Scientific Library (GSL) --
+development package", which has the name "libgsl0-dev".
+
+In Fedora make sure that "gsl-devel" is install. You can try in the terminal
+"dnf install gsl-devel"
