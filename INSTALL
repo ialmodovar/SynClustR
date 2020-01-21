@@ -1,4 +1,4 @@
-The RKNOBSynC R package is a package that use some of the GSL C library (note capitalization).
+The SynClustR R package is a package that use some of the GSL C library (note capitalization).
 
 Installing gsl from source requires you to download and install GSL
 first.  Ensure that you can compile and run a simple test program such
