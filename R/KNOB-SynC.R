@@ -50,7 +50,7 @@ generalized.overlap <- function(overlap.mat) {
 }
 
 
-norm.res <- function(X, Means, ids){
+norm.res <- function(X, Means, ids,desired.ncores){
   ##******************************
   ##
   ## compute normed residual
@@ -71,12 +71,9 @@ norm.res <- function(X, Means, ids){
   )
   
   psi <- sapply(Eps,norm,type = "2")
-  
-    names(psi) <- NULL
-
-
-   na.total <-  apply(X,1,function(z) sum(!is.na(z)))/p
-     psi  <- psi * na.total
+  names(psi) <- NULL
+  na.total <-  apply(X,1,function(z) sum(!is.na(z)))/p
+  psi  <- psi * na.total
   
   ##******************************
   ## compute psi and pseudo psi
@@ -104,26 +101,30 @@ norm.res <- function(X, Means, ids){
   ## Compute Pseudo residuals
   ##**************************
   nks <- as.numeric(table(ids))
-  pseudo.psi<-  t(sapply(1:n,function(i){
+  cl <- makeCluster(desired.ncores)
+  clusterExport(cl, list("norm","sum"))
+  pseudo.psi <- t(parSapply(cl,X = 1:n,FUN = function(i){
     k <- ids[i]
     Means2 <- Means
     nk <- nks[k]
     find.nan <- which(!is.na(X[i,]));
     Means2[k,find.nan] <- (nk * Means[k,find.nan] - X[i,find.nan])/(nk-1)
+##    parSapply(cl,X = 1:K, FUN= function(l){
     sapply(1:K, function(l){
       nl <- nks[l]
       Means2[l,find.nan] <- (nl * Means[l,find.nan] + X[i,find.nan])/(nl+1)
-      Psi.rev<- norm(X[i,find.nan]-Means2[l,find.nan],type = "2") * sum(!is.na(X[i,]))/p
+      Psi.rev <- norm(X[i,find.nan]-Means2[l,find.nan],type = "2") * sum(!is.na(X[i,]))/p
       Psi.rev
     })
   }))
-  
+  stopCluster(cl)
+
   list(Psi = psi, PsiAll=Diff.Psi, E = Eps,PseudoPsi=pseudo.psi)
 }
 
 ##KNOBSynC
 KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
-                     kappa = NULL, b = NULL, trueids=NULL,inv.roles=FALSE, 
+                     kappa = NULL, b = NULL,desired.ncores=2, trueids=NULL,inv.roles=FALSE, 
                      ret.steps = FALSE,verbose=FALSE,...)
 {
   ##*************************************************************************************************************************************
@@ -206,7 +207,8 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
   if(verbose){
     cat("Computing normed residuals and pseudo-normed residuals. \n")
   }
-  residuals.norm <- norm.res(X = X, Means = Means, ids = ids)
+  desired.ncores <- min(detectCores(),desired.ncores)
+  residuals.norm <- norm.res(X = X, Means = Means, ids = ids,desired.ncores=desired.ncores)
   
   psi <- residuals.norm$Psi 
   pseudo.psi <- residuals.norm$PsiAll
@@ -221,13 +223,20 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
   ##
   ##*************************************
   if(verbose){
-    cat("Estimating the missclasification overlaps using kernel estimation.\n")
+    cat("Estimating the missclasification probabilities using kernel estimation.\n")
   }
   if(is.null(b)){
     b <- gsl_bw_mise_cdf((psi*psi/(wss/(p*(n-K)))))
   }
-  Fhat.Psi <- t(apply(pseudo.psi,1,function(z){kcdf(x = psi,b = b,kernel=kernel,xgrid=z,inv.roles=inv.roles)$Fhat}))
+##  Fhat.Psi <- t(apply(pseudo.psi,1,function(z){kcdf(x = psi,b = b,kernel=kernel,xgrid=z,inv.roles=inv.roles)$Fhat}))
+
+  cl <- makeCluster(desired.ncores)
+  clusterExport(cl, list("kcdf"))
+  Fhat.Psi <- t(parApply(cl = cl,X = pseudo.psi,MARGIN = 1,FUN = function(z){kcdf(x = psi,b = b,kernel=kernel,
+                                                                               xgrid=z,inv.roles=inv.roles)$Fhat}))
+  stopCluster(cl)
   
+    
   ##*********************************
   ##
   ## compute \hat{omega}_{kl}
