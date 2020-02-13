@@ -251,7 +251,7 @@ kmH.main <- function(M, L, KL.res, verbose = T, Kstar = NULL,
 
     Wi <- which.max(apply(X = W, MARGIN = 1, FUN = mean))
     if (verbose) {
-        print(apply(X = W, MAR = 1, FUN = mean))
+        print(apply(X = W, MARGIN = 1, FUN = mean))
         print(Wi)
     }
     opt.part <- part.mat[ind.mat[Wi, 1], , ind.mat[Wi, 2]]

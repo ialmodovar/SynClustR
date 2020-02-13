@@ -1,16 +1,16 @@
 # SynClustR
-Syncitial Clustering Algorithms in R
+Syncytial Clustering Algorithms in R
 
 ##### Authors:
 Israel Almodovar-Rivera and Ranjan Maitra
 
 ## Installation
 
-RSynC requires
+SynClustR requires
 
 ```
 - R version 3.0.0 or higher.
-- R packages: abind, doMC, foreach, parallel.
+- R packages: abind, foreach, parallel.
 - GSL - GNU Scientific Library
 ```
 
@@ -18,5 +18,5 @@ The package can be installed via the devtools package:
 
 ```R
 library("devtools")
-install_github("ialmodovar/RSynC")
+install_github("ialmodovar/SynClustR")
 ```

@@ -9,12 +9,12 @@ export("kcdf")
 export("generalized.overlap")
 export("KNOBSynC")
 export("kmeans.all")
+export("kmns.all.soln")
 export("overlap.map")
 export("norm.res")
 export("kmH")
 
 import(abind)
-import(doMC)
 import(foreach)
 import(parallel)
 

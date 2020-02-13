@@ -24,30 +24,32 @@
 ##******************************************************
 
 kmns.all.soln <- function(k, x, x.hc, nstarts, h.c = TRUE) {
-
-    if (k == 1){
-        kmeans(x, centers = 1)
+  
+  if (k == 1){
+    kmeans(x, centers = 1)
+  } else {
+    if (h.c) {
+      cl <- cutree(x.hc, k = k)
+      x.df <- data.frame(x = x, cl = as.factor(cl))
+      km.center <- as.matrix(aggregate(formula = . ~ cl, FUN  = mean, data = x.df)[,-1])
+      km1 <- kmeans(x, centers = km.center, iter.max = 100)
+      km2 <- kmeans(x, centers = k, iter.max = 100, nstart =  nstarts * k)
+      if (km1$tot.withins < km2$tot.withinss)
+        km1 else
+          km2
     } else {
-        if (h.c) {
-         cl <- cutree(x.hc, k = k)
-         x.df <- data.frame(x = x, cl = as.factor(cl))
-         km.center <- as.matrix(aggregate(formula = . ~ cl, FUN  = mean, data = x.df)[,-1])
-         km1 <- kmeans(x, centers = km.center, iter.max = 100)
-         km2 <- kmeans(x, centers = k, iter.max = 100, nstart =  nstarts * k)
-  if (km1$tot.withins < km2$tot.withinss)
-      km1 else
-              km2
-        } else {
-            kmeans(x, centers = k, iter.max = 100, nstart =  nstarts * k)
-        }
+      kmeans(x, centers = k, iter.max = 100, nstart =  nstarts * k)
     }
+  }
 }
 
 
-kmeans.all <- function(x, maxclus, nstarts = 10 * prod(dim(x)),desired.ncores = 2, h.c = TRUE) {
+
+kmeans.all <- function(x, maxclus, nstarts = prod(dim(x)),desired.ncores = 2, h.c = TRUE) {
     ## x = dataset (matrix of observations: each row is an observation vector)
     ## maxclus = the maximum number of clusters.
     ## h.c = if hierarchical clustering should also be done
+  
 
     distortion <-  function(k, res, x) (res[[k]]$tot.withinss/prod(dim(x)))
 
@@ -59,15 +61,17 @@ kmeans.all <- function(x, maxclus, nstarts = 10 * prod(dim(x)),desired.ncores = 
 
     KL <- function(k, res, x) (ifelse(k == 1, NA, abs(dif(k = k, res = res, x = x)/dif(k = k + 1, res = res, x = x))))
     
+    x.hc <- hclust(dist(x), method = "ward.D2")
+    
     desired.ncores <- min(detectCores(),desired.ncores)
     
-    registerDoMC(desired.ncores)
-
-    x.hc <- hclust(dist(x), method = "ward.D2")
-
-    kmns.results <- foreach(k = 1:maxclus) %dopar% {
-        km.res <- kmns.all.soln(k = k, x = x, x.hc = x.hc, nstarts = nstarts, h.c = h.c)
-    }
+    cl <- makeCluster(desired.ncores)
+    clusterExport(cl, list("kmns.all.soln"))
+    kmns.results <- parLapply(cl,1:maxclus, function(i){
+      kmns.all.soln(k = i,x=x, x.hc = x.hc, nstarts = nstarts, h.c =h.c)
+    })
+    stopCluster(cl)
+    
 
     kmns.dstrtn <- sapply(X = 1:maxclus, FUN = distortion, res = kmns.results, x = x)
     jump.stat <- sapply(1:maxclus, FUN = jump, dstrtn = kmns.dstrtn, x = x)

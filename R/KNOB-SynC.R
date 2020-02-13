@@ -155,7 +155,7 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
       cat(sprintf("Performing k-means range of number of groups using %s method [1,%d]. \n",EstK,Kmax))
     }
     
-    kmeans.results <- kmeans.all(x = X,maxclus = Kmax,...)
+    kmeans.results <- kmeans.all(x = X,maxclus = Kmax, desired.ncores = desired.ncores,...)
     if(EstK=="jump"){
       K <- which.max(unlist(kmeans.results$jump.stat))
       kmns.results <- kmeans.results$kmns.results[[K]]
@@ -228,9 +228,8 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
   if(is.null(b)){
     b <- gsl_bw_mise_cdf((psi*psi/(wss/(p*(n-K)))))
   }
-##  Fhat.Psi <- t(apply(pseudo.psi,1,function(z){kcdf(x = psi,b = b,kernel=kernel,xgrid=z,inv.roles=inv.roles)$Fhat}))
 
-  cl <- makeCluster(desired.ncores)
+  cl <- makeCluster(desired.ncores,...)
   clusterExport(cl, list("kcdf"))
   Fhat.Psi <- t(parApply(cl = cl,X = pseudo.psi,MARGIN = 1,FUN = function(z){kcdf(x = psi,b = b,kernel=kernel,
                                                                                xgrid=z,inv.roles=inv.roles)$Fhat}))
@@ -452,7 +451,6 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
         }
         Groups.step[[iter]] <- GG
         while((max.overlap[iter] > kappa*gen.overlap[iter]) & (gen.overlap[iter] > min.gen.overlap) & (gen.overlap[iter] <= gen.overlap[iter-1])) {
-          ##      browser()
           ##***********************************************************
           ##
           ## If merging occurs, then generalized overlap will start
@@ -514,6 +512,18 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
             ##
             ##*********************************
             Omega.lk.merge <- array(0,dim=c(Kmerge,Kmerge))
+            if(Kmerge==1){
+              ids.of.GG <- GG[[1]]
+              nk <- length(ids.of.GG)
+              max.omega.gg <- rep(0,nk)
+              
+              Omega.lk.merge[1,1] <- 1
+              iter <- iter+1
+              Kstep[iter] <- Kmerge
+              gen.overlap[iter] <- 1 ## compute generalized overlap
+              max.overlap[iter] <- 1 ## compute maximum overlap
+              mean.overlap[iter] <- 1 ## compute mean overlap            
+            } else{
             for(k in 1:(Kmerge-1)){
               for(l in (k+1):(Kmerge)){
                 ids.of.GG <- GG[[l]]
@@ -534,6 +544,7 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
             gen.overlap[iter] <- generalized.overlap(overlap.mat = Omega) ## compute generalized overlap
             max.overlap[iter] <- max(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)]) ## compute maximum overlap
             mean.overlap[iter] <- mean(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)]) ## compute mean overlap
+            }
             Groups.step[[iter]] <- GG
             
             if(verbose){
