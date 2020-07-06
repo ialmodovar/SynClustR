@@ -1,9 +1,10 @@
-# PKG_LIBS=-LF:/MinGW/usr/local/lib -lgsl -lgslcblas
-# CPPFLAGS=-I$(R_HOME)/include -IF:/MinGW/usr/local/include
-# PKG_CPPFLAGS=-IF:/MinGW/usr/local/include
+PKG_CPPFLAGS= -I../windows/gsl-2.4/include -I../inst/include
+PKG_LIBS= -L../windows/gsl-2.4/lib${R_ARCH} -lgsl -lgslcblas
 
-# lines below supplied by Brian Ripley and Uwe Ligges
+all: clean winlibs
 
-PKG_CPPFLAGS=-I$(LIB_GSL)/include
-PKG_LIBS=-L$(LIB_GSL)/lib -lgsl -lgslcblas
+winlibs:
+	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" "../tools/winlibs.R"
 
+clean:
+	rm -f $(SHLIB) $(OBJECTS)
