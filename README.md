@@ -1,7 +1,7 @@
 # SynClustR
 Syncytial Clustering Algorithms in R
 
-##### Authors:
+## Authors:
 Israel Almodovar-Rivera and Ranjan Maitra
 
 ## Installation
@@ -20,3 +20,8 @@ The package can be installed via the devtools package:
 library("devtools")
 install_github("ialmodovar/SynClustR")
 ```
+
+
+##### Note
+
+kmH() required the R package doMC. For now, it's not available for Windows. 
