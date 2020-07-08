@@ -24,4 +24,4 @@ install_github("ialmodovar/SynClustR")
 
 ##### Note
 
-The function ```R kmH()``` required the R package doMC. For now, it's not available for Windows. 
+The function ```kmH()``` required the R package doMC. For now, it's not available for Windows. 
