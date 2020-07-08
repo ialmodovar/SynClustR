@@ -9,7 +9,7 @@ Israel Almodovar-Rivera and Ranjan Maitra
 SynClustR requires
 
 ```
-- R version 3.0.0 or higher.
+- R version 3.5.0 or higher.
 - R packages: abind, foreach, parallel.
 - GSL - GNU Scientific Library
 ```
