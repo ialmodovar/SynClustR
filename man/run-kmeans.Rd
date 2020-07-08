@@ -13,9 +13,10 @@ kmeans.all(x, maxclus, nstarts,desired.ncores = 2, h.c = TRUE)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 \item{x}{numeric matrix of data, or an object that can be coerced to such a matrix (such as a numeric vector or a data frame with all numeric columns).}
-\item{maxclus}{Maximum number of clusters in the given range. Will estimate the number of groups from [1,maxclus].}
+\item{maxclus}{Maximum number of clusters in the given range. It will estimate the number of groups from [1,maxclus].}
 \item{nstarts}{How many random sets should be chosen?}
-\item{desired.ncores}{Number of cores set to be by the user}
+\item{desired.ncores}{Number of cores set to be used by the
+  user. Default is 2.}
 \item{h.c}{If use hierarchical clustering as a initialization}
 }
 \details{
@@ -50,7 +51,7 @@ Israel Almodóvar-Rivera and Ranjan Maitra.
 }
  
 \examples{
-\dontrun{
+\donttest{
 set.seed(787)
 x <- rbind(matrix(rnorm(100, sd = 0.3), ncol = 2),
            matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2))

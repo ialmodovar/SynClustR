@@ -232,8 +232,6 @@ kmH.main <- function(M, L, KL.res, verbose = T, Kstar = NULL,
 
     W <- diag(L*M)
     
-
-    
     ind.mat <- NULL
     m <- 1
     for (i in 1:L)
@@ -257,7 +255,6 @@ kmH.main <- function(M, L, KL.res, verbose = T, Kstar = NULL,
     opt.part <- part.mat[ind.mat[Wi, 1], , ind.mat[Wi, 2]]
     return(list(opt.cluster = opt.part, all.partitions = part.mat))
 }
-
 
 
 ##
@@ -291,8 +288,6 @@ kmH <- function(x, kmns.results = NULL, nstart =  prod(dim(x)),B = 100,
     
     xx.kmH <- kmH.main(KL.res=kmns.results, minK0 = 1, M = M, L = L, verbose = verbose)
     zz <- list(kmeans.results = kmns.results, kmH.res = xx.kmH)
-
-
     
     a <- xx.kmH$all.partitions 
     n<-dim(a)[2]

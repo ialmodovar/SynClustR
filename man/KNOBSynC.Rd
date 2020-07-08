@@ -58,7 +58,7 @@ Israel Almodóvar-Rivera and Ranjan Maitra.
 }
  
 \examples{
-\dontrun{
+\donttest{
 set.seed(787)
 ## Example 1: Merging will occur. Best clustering solution when generalized overlap = 
 data(Bullseye)

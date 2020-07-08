@@ -288,7 +288,7 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
   ## Forcing them to merge will create unstable clustering.
   ## \check{\omega}/\genoverlap >= 5 is the same as Infinity see Almodovar and Maitra 2018
   ##**********************************************************************************
-  if(max.overlap[iter]/gen.overlap[iter] <= 4){
+  if(max.overlap[iter] <= 4* gen.overlap[iter]){
     if(verbose){
       cat(sprintf("|Iteration |  K  |  Max Overlap  | Mean Overlap |  Generalized Overlap \t| \n"))
       cat(sprintf("| %d \t   | %d  |  %.6f \t |  %.6f \t|  %.6f \t        |\n",iter,Kmerge,max.overlap[iter],mean.overlap[iter],gen.overlap[iter]))

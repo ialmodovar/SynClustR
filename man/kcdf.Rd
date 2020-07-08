@@ -45,7 +45,7 @@ Israel Almodóvar-Rivera.
 }
  
 \examples{
-\dontrun{
+\donttest{
 set.seed(787)
 ## gamma(5/2,2) = chisquared with 5 degrees
 x <- rgamma(n = 500,shape= 5/2,scale = 2)

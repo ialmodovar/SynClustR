@@ -45,7 +45,7 @@ kmns.all.soln <- function(k, x, x.hc, nstarts, h.c = TRUE) {
 
 
 
-kmeans.all <- function(x, maxclus, nstarts = prod(dim(x)),desired.ncores = 2, h.c = TRUE) {
+kmeans.all <- function(x, maxclus, nstarts = prod(dim(x)),desired.ncores = 2, h.c = TRUE,...) {
     ## x = dataset (matrix of observations: each row is an observation vector)
     ## maxclus = the maximum number of clusters.
     ## h.c = if hierarchical clustering should also be done
@@ -65,7 +65,7 @@ kmeans.all <- function(x, maxclus, nstarts = prod(dim(x)),desired.ncores = 2, h.
     
     desired.ncores <- min(detectCores(),desired.ncores)
     
-    cl <- makeCluster(desired.ncores)
+    cl <- makeCluster(desired.ncores,...)
     clusterExport(cl, list("kmns.all.soln"))
     kmns.results <- parLapply(cl,1:maxclus, function(i){
       kmns.all.soln(k = i,x=x, x.hc = x.hc, nstarts = nstarts, h.c =h.c)

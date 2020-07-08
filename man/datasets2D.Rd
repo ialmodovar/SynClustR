@@ -15,7 +15,7 @@
 \docType{data}
 \title{2D Toy datasets}
 \description{
-  Toy datasets to test and demonstrate \pkg{RSynC}.
+  Toy datasets to test and demonstrate \pkg{SynClustR}.
 }
 
 \format{

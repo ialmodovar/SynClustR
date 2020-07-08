@@ -51,7 +51,7 @@ Israel Almodóvar-Rivera and Ranjan Maitra.
 }
  
 \examples{
-\dontrun{
+\donttest{
 set.seed(787)
 data("Bullseye")
 kk <- kmH(x = Bullseye[-3],maxclus = sqrt(nrow(Bullseye)),verbose = TRUE)

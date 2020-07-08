@@ -31,11 +31,11 @@ Melnykov, V., Chen, W.-C., and Maitra, R. (2012) ``MixSim: An R Package for Simu
 }
 \author{ Volodymyr Melnykov, Wei-Chen Chen, and Ranjan Maitra. }
 \examples{
-%\dontrun{
+
 id1 <- c(rep(1, 50), rep(2,100))
 id2 <- rep(1:3, each = 50)
 RandIndex(id1, id2)
-%}
+
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
