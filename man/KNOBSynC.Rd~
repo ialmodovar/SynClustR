@@ -8,10 +8,8 @@ Kernel-estimated Nonparametric Overlap-Based Syncytial Clustering
 Merge clustering components using smooth estimation of the missclassification probabilities
 }
 \usage{
-KNOBSynC(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,
-kernel = "RIG", kappa = NULL, b = NULL,desired.ncores=2,
-trueids=NULL,inv.roles=FALSE,
-ret.steps = FALSE,verbose=FALSE,...)
+KNOBSynC(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
+kappa = NULL, b = NULL,desired.ncores=2, trueids=NULL,inv.roles=FALSE, ret.steps = FALSE,verbose=FALSE,...)
 
 }
 %- maybe also 'usage' for other objects documented here.

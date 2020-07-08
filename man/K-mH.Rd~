@@ -26,9 +26,7 @@ hmap.pdf.file = NULL, desired.ncores = 2,...)
 \item{verbose}{Show progress. Default is FALSE.}
 \item{maxclus}{Default is NULL.If not provided will choose Kmax =  max{50,sqrt(n)}}
 \item{hmap.pdf.file}{file to store the pdf of the heatmap (NULL, skipped by default)}
-\item{desired.ncores}{Number of desired cores. By default is
-  min(detectCores(),desired.ncores=2)}
-\item{...}{Additional arguments to be pass for the heatmap}
+\item{desired.ncores}{Number of desired cores. By default is min(detectCores(),desired.ncores=2)}
 }
 \details{
 }

@@ -132,7 +132,7 @@ Israel A. Almodovar-Rivera and Ranjan Maitra
 \references{
 Almodovar-Rivera, I., & Maitra, R. (2018). Kernel-estimated Nonparametric Overlap-Based Syncytial Clustering. arXiv preprint arXiv:1805.09505.
 
-H. Chang and D.-Y. Yeung (2008). "Robust path-based spectral clustering." Pattern Recognition, 41(1):191-203. ISSN 0031-3203.
+H. Chang and D.-Y. Yeung (2008). “Robust path-based spectral clustering.” Pattern Recognition, 41(1):191-203. ISSN 0031-3203.
 
 L. Fu and E. Medico, FLAME, a novel fuzzy clustering method for the analysis of DNA microarray data. BMC bioinformatics, 2007. 8(1): p. 3. 
 
@@ -140,14 +140,15 @@ A. Gionis, H. Mannila, and P. Tsaparas, Clustering aggregation. ACM Transactions
 
 A. Jain and M. Law, Data clustering: A user's dilemma. Lecture Notes in Computer Science, 2005. 3776: p. 1-10. 
 
-Peterson, A. D., Ghosh, A. P., & Maitra, R. (2018). Merging K-means with
-hierarchical clustering for identifying general-shaped groups. Stat,
-7(1), e172.
+Peterson, A. D., Ghosh, A. P., & Maitra, R. (2018). Merging K‐means with
+hierarchical clustering for identifying general‐shaped groups. Stat, 7(1), e172.
 
-W. Stuetzle and R. Nugent, "A generalized single linkage method for estimating the cluster tree of a density," Journal of Computational
+W. Stuetzle and R. Nugent, “A generalized single linkage method for estimating the cluster tree of a density,” Journal of Computational
 and Graphical Statistics, 2010.
 
-C. J. Veenman, M. J. T. Reinders, and E. Backer (2002). "A maximum variance cluster algorithm." IEEE Transactions on Pattern Analysis and Machine Intelligence, 24 (9):1273-1280.
+C. J. Veenman, M. J. T. Reinders, and E. Backer (2002). “A maximum
+variance cluster algorithm.” IEEE Transactions on Pattern Analysis and
+Machine Intelligence, 24 (9):1273-1280.
 
 C.T. Zahn, Graph-theoretical methods for detecting and describing gestalt clusters. IEEE Transactions on Computers, 1971. 100(1): p. 68-86. 
 

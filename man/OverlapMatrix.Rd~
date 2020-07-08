@@ -8,10 +8,9 @@ Display Pairwise Overlap Measures
 Display the map of pairwise overlap measures of Maitra and Melnykov (JCGS, 2012)
 }
 \usage{
-overlap.map(overlap.mat, map.col = c("#FFFFD9","#EDF8B1",
-"#C7E9B4","#7FCDBB","#41B6C4","#1D91C0","#225EA8","#253494","#081D58"),
-linescol = "magenta", map.range = NULL, lab.col = 1,
-lab.cex = 0.95, map.cex = 0.85, legend.cex = 1)
+overlap.map(overlap.mat, map.col = c("#FFFFD9","#EDF8B1","#C7E9B4","#7FCDBB",
+"#41B6C4","#1D91C0","#225EA8","#253494","#081D58"), linescol = "magenta", 
+             map.range = NULL, lab.col = 1, lab.cex = 0.95, map.cex = 0.85, legend.cex = 1)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

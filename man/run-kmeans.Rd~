@@ -8,7 +8,8 @@ Run parallezied k-means algorithm
 Run k-means for a range of cluster and estimate the number of groups using the Jump Method and Krzanowski and Lai.
 }
 \usage{
-kmeans.all(x, maxclus, nstarts = prod(dim(x)),desired.ncores = 2, h.c = TRUE,...)
+kmeans.all(x, maxclus, nstarts = prod(dim(x)),
+desired.ncores = 2, h.c = TRUE,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

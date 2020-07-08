@@ -7,7 +7,7 @@
 ## Jump method of Sugar and James (2003) 
 ## Krzanwoski and Lai (1985) 
 ##
-## Author: 
+## Authors: 
 ## Ranjan Maitra
 ## Iowa State University
 ## Department of Statistics 
