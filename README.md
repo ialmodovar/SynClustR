@@ -10,7 +10,7 @@ SynClustR requires
 
 ```
 - R version 3.5.0 or higher.
-- R packages: abind, foreach, parallel.
+- R packages: abind, foreach, parallel, doParallel.
 - GSL - GNU Scientific Library
 ```
 
@@ -22,6 +22,3 @@ install_github("ialmodovar/SynClustR")
 ```
 
 
-##### Note
-
-The function ```kmH()``` required the R package doMC. For now, it's not available for Windows. 
