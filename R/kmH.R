@@ -12,7 +12,7 @@ KL.meas <- function(k, res, x, nscat) {
     kl <- ifelse(min(res[[k]]$size) <= nscat, -Inf, ifelse(k == 1, NA, abs(dif(k = k, res = res, x = x)/dif(k = k + 1, res = res, x = x))))
 }
 
-kmns.KL <- function(x, maxclus, scat = 0.001, verbose = FALSE, desired.ncores = 2, nstart = prod(dim(x))) {
+kmns.KL <- function(x, maxclus, scat = 0.001, verbose = FALSE, desired.ncores = 2, nstart = prod(dim(x)),...) {
     
     ## x = dataset (matrix of observations: each row is an observation vector)
     ## maxclus = the maximum number of clusters.
