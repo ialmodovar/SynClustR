@@ -17,6 +17,7 @@ export("kmH")
 import(abind)
 import(foreach)
 import(parallel)
+import(doParallel)
 
 importFrom("graphics", "axis", "frame", "image", "layout", "lines",
              "par", "plot.new", "plot.window", "rect", "text")
