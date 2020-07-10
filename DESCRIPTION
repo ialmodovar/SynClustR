@@ -2,7 +2,7 @@ Package: SynClustR
 Type: Package
 Title: Syncytial Clustering Algorithms in R
 Version: 0.1
-Date: 2020-7-7
+Date: 2020-7-10
 Author: Israel Almodovar-Rivera and Ranjan Maitra
 Maintainer: Israel Almodovar-Rivera <israel.almodovar@upr.edu>
 Description: Syncytial clustering is the name that we introduce for methods that merge groups obtained from standard clustering algorithms in order to reveal complex group structure in the data. Standard clustering algorithms usually find regular-structured clusters such as ellipsoidally- or spherically-dispersed groups, but are more challenged with groups lacking formal structure or definition.
