@@ -10,8 +10,6 @@ dif <- function(k, res, x) (sc.trW(k = k - 1, res = res, x = x) - sc.trW(k = k, 
 
 KL.meas <- function(k, res, x, nscat) {
     kl <- ifelse(min(res[[k]]$size) <= nscat, -Inf, ifelse(k == 1, NA, abs(dif(k = k, res = res, x = x)/dif(k = k + 1, res = res, x = x))))
-    cat("k = ", k, " WSS = ", res[[k]]$tot.withinss," Krzanowski and Lai criterion = ", kl, "\n")
-    kl
 }
 
 kmns.KL <- function(x, maxclus, scat = 0.001, verbose = FALSE, desired.ncores = 2, nstart = prod(dim(x))) {
@@ -36,14 +34,15 @@ kmns.KL <- function(x, maxclus, scat = 0.001, verbose = FALSE, desired.ncores = 
 
     maxclus <- sum(km.sol$size > nscat) - 1
     desired.ncores <- min(detectCores(),desired.ncores)
-    registerDoMC(desired.ncores)
-
+    cl <- makeCluster(desired.ncores,...)
+    registerDoParallel(cl)
     kmns.results <- foreach(i = 1:(maxclus+1),.export=c("kmns.soln")) %dopar% { 
         if (verbose) {
             cat("Beginning k-means for k = ", i, "\n")
         }
         kmns.soln(i, x = x.red,nstart = nstart)
     }
+    stopCluster(cl)
     kmns.KL <- lapply(X = 1:maxclus, FUN = KL.meas, res = kmns.results, x = x.red, nscat = nscat)
     list(kmns.results = kmns.results, KL = kmns.KL, x.red = x.red, x.scat = x.scat, maxclus = maxclus, id.scat = id.scat)
 }
@@ -305,11 +304,10 @@ kmH <- function(x, kmns.results = NULL, nstart =  prod(dim(x)),B = 100,
     if (verbose) 
         cat("mean and sd ",  mu.xx, sd.xx, "\n")
     
+     kstar <- NULL
     desired.ncores <- min(detectCores(),desired.ncores)
-    registerDoMC(desired.ncores)
-    
-    kstar <- NULL
-
+    cl <- makeCluster(desired.ncores,...)
+    registerDoParallel(cl)
     samp.size <- min(max(nrow(x)*0.25, 500), nrow(x))
     kstars <- foreach(i = 1:B) %dopar% { 
         if (nrow(zz$kmeans.results$x.red) <= samp.size) 
@@ -323,6 +321,7 @@ kmH <- function(x, kmns.results = NULL, nstart =  prod(dim(x)),B = 100,
             cat("Done i = ", i, kstar, "\n")
         kstar
     }
+    stopCluster(cl)
     if (verbose)
         print(table(unlist(kstars)))
     optk <- round(median(unlist(kstars)))
