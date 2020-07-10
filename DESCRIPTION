@@ -9,6 +9,6 @@ Description: Syncytial clustering is the name that we introduce for methods that
 Depends: R (>= 3.5.0)
 License: GPL (>= 2)
 LazyLoad: yes
-Imports: abind, foreach, parallel
+Imports: abind, foreach, parallel, doParallel
 SystemRequirements: GNU GSL
 NeedsCompilation: yes
