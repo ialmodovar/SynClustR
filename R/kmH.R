@@ -37,9 +37,7 @@ kmns.KL <- function(x, maxclus, scat = 0.001, verbose = FALSE, desired.ncores = 
     cl <- makeCluster(desired.ncores,...)
     registerDoParallel(cl)
     kmns.results <- foreach(i = 1:(maxclus+1),.export=c("kmns.soln")) %dopar% { 
-        if (verbose) {
-            cat("Beginning k-means for k = ", i, "\n")
-        }
+   
         kmns.soln(i, x = x.red,nstart = nstart)
     }
     stopCluster(cl)
