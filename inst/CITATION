@@ -8,5 +8,5 @@ citEntry(
   year = "2020",
   note = "{R} Package, URL http://github.com/ialmodovar/SynClustR",
   textVersion = "Almodovar-Rivera, I., Maitra, R. (2020) SynClustR: Syncytial Clustering Algorithms in R. R Package, URL http://github.com/ialmodovar/SynClustR",
-  key = "Almodovar-Rivera2020SynClustRpackage"
+  key = "AlmodovarRivera20SynClustR"
 )
