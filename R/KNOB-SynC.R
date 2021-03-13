@@ -4,7 +4,7 @@
 ##
 ## Merge cluster using Kernel nonparametric overlap based syncital (KNOB-SynC).
 ## kernel estimator choices are RIG (default), gamma (original and inverse roles), 
-## and gaussian. See Almodovar-Maitra (2018) for details.
+## and gaussian. See Almodovar-Rivera and Maitra (2020) for details.
 ## 
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -109,7 +109,6 @@ norm.res <- function(X, Means, ids,desired.ncores){
     nk <- nks[k]
     find.nan <- which(!is.na(X[i,]));
     Means2[k,find.nan] <- (nk * Means[k,find.nan] - X[i,find.nan])/(nk-1)
-##    parSapply(cl,X = 1:K, FUN= function(l){
     sapply(1:K, function(l){
       nl <- nks[l]
       Means2[l,find.nan] <- (nl * Means[l,find.nan] + X[i,find.nan])/(nl+1)
@@ -248,6 +247,7 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
   mean.overlap <- rep(0,K)  ## store compute bar overlap
   Kstep <- rep(0,K)
   Groups.step <- list()
+  Ids.step <- list()  
   Omega.lk <- array(0,dim=c(K,K))
   for(k in 1:(K-1)){
     for(l in (k+1):K){
@@ -282,6 +282,7 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
   max.overlap[iter] <- max(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)])
   mean.overlap[iter] <- mean(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)])
   Groups.step[[iter]] <- GG
+  Ids.step[[iter]] <- idsMerge 
   
   ##************************************************************************************
   ## If the generalized overlap for the k-means clustering is very low, there's not need to merge them.
@@ -450,6 +451,7 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
           ar[iter] <- RandIndex(id1=trueids,id2=idsMerge)$AR
         }
         Groups.step[[iter]] <- GG
+        Ids.step[[iter]] <- idsMerge 
         while((max.overlap[iter] > kappa*gen.overlap[iter]) & (gen.overlap[iter] > min.gen.overlap) & (gen.overlap[iter] <= gen.overlap[iter-1])) {
           ##***********************************************************
           ##
@@ -546,7 +548,7 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
             mean.overlap[iter] <- mean(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)]) ## compute mean overlap
             }
             Groups.step[[iter]] <- GG
-            
+            Ids.step[[iter]] <- idsMerge 
             if(verbose){
               cat(sprintf("| %d \t   | %d  |  %.6f \t |  %.6f \t|  %.6f \t        |\n",iter,Kmerge,max.overlap[iter],mean.overlap[iter],gen.overlap[iter]))
               
@@ -573,7 +575,7 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
         diag(Omega.lk2.merge) <- 1
         
         if(ret.steps){
-          knob.sync.kappa[[kappa]] <- list(KmeansSoln = kmns.results,OmegaMapKmns = Omega.lk2, OmegaMapKNS=Omega.lk2.merge,Ids = ids, IdsMerge = idsMerge, GroupsStep = Groups.step,
+          knob.sync.kappa[[kappa]] <- list(KmeansSoln = kmns.results,OmegaMapKmns = Omega.lk2, OmegaMapKNS=Omega.lk2.merge,Ids = ids, IdsMerge = idsMerge,IdsStep =   Ids.step, GroupsStep = Groups.step,
                                            Groups = GG, MaxOverlap=max.overlap[1:iter],MeanOverlap = mean.overlap[1:iter], GenOverlap = gen.overlap[1:(iter)],
                                            Psi=psi, Fhat = Fhat.Psi, AR= ar[1:iter],bw = b)
         } else{
@@ -590,10 +592,11 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
         Omega.lk2.merge <- Omega.lk2.merge+ t(Omega.lk2.merge)
         diag(Omega.lk2.merge) <- 1
         if(ret.steps){
-          names(Groups.step) <- paste("Step",1:iter,sep="")
+            names(Groups.step) <- paste("Step",1:iter,sep="")
+            names(Ids.step) <- paste("Step",1:iter,sep="")
           knob.sync.kappa[[kappa]] <- list(KmeansSoln = kmns.results,OmegaMapKmns = Omega.lk2,
                                            OmegaMapKNS=Omega.lk2.merge,Ids = ids, IdsMerge = idsMerge, 
-                                           GroupsStep = Groups.step,
+                                           GroupsStep = Groups.step,  IdsStep = Ids.step,
                                            Groups = GG, MaxOverlap=max.overlap[1:iter],
                                            MeanOverlap = mean.overlap[1:iter],
                                            GenOverlap = gen.overlap[1:(iter)],
