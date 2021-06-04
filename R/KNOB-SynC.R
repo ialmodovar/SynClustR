@@ -29,7 +29,7 @@
 ## San Juan, PR, USA 00953
 ## email: israel.almodovar@upr.edu
 ##
-## Copyright May 2018
+## Copyright May 2018, Modified May 2021
 ##***************************************************************************************
 
 
@@ -122,7 +122,7 @@ norm.res <- function(X, Means, ids,desired.ncores){
 }
 
 ##KNOBSynC
-KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
+KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",  min.gen.overlap = 1e-5,
                      kappa = NULL, b = NULL,desired.ncores=2, trueids=NULL,inv.roles=FALSE, 
                      ret.steps = FALSE,verbose=FALSE,...)
 {
@@ -214,7 +214,7 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
   psi.rev <- residuals.norm$PseudoPsi
   
   ## minimum generazid overlap
-  min.gen.overlap <- 1/prod(dim(X))
+##  min.gen.overlap <- 1/prod(dim(X))
   ##*************************************
   ##
   ## Choice of the kernel to estimate
