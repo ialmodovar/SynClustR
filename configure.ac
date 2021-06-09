@@ -11,7 +11,7 @@
 ## Licensed under GNU GPL 2 or later
 
 # The version set here will propagate to other files from here
-AC_INIT([SynClustR], 0.1)
+AC_INIT([SynClustR], 0.15)
 
 # Checks for common programs using default macros
 AC_PROG_CC

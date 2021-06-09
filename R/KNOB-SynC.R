@@ -1,143 +1,71 @@
-##***************************************************************************************
-## 
-## @file: KNOB-SynC.R
-##
-## Merge cluster using Kernel nonparametric overlap based syncital (KNOB-SynC).
-## kernel estimator choices are RIG (default), gamma (original and inverse roles), 
-## and gaussian. See Almodovar-Rivera and Maitra (2020) for details.
-## 
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-## 
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-## Authors:
-##
-## Israel Almodovar-Rivera, PhD                       Ranjan Maitra, PhD
-## University of Puerto Rico                          Department of Statistics
-## Medical Science Campus                             Iowa State University
-## Graduate School of Public Health                   Ames, IA, 50010
-## Department of Biostatistics and Epidemiology       email: maitra@iastate.edu
-## San Juan, PR, USA 00953
-## email: israel.almodovar@upr.edu
-##
-## Copyright May 2018, Modified May 2021
-##***************************************************************************************
-
+##*************************************************************************************************************************************
+#' KNOBSynC
+#' 
+#' @title Kernel-estimated Nonparametric Overlap-Based Syncytial Clustering
+#' 
+#' @description Merge clustering components using smooth estimation of the missclassification probabilities
+#' 
+#' @param X dataset of size n x p
+#' @param kmns.results clustering solution. Default is NULL, if provided a class kmeans can be input. This can be a list with centers and cluster ids  
+#' @param min.gen.overlap Minimum desired generalized overlap of Maitra (2010). Algorithm will stop when this overlap has been reached. Default is 0.00001. 
+#' @param kappa  Syncytial clustering parameter. As kappa increase fewer clusters will be merge. For more details see Almodovar-Rivera and Maitra (2020).
+#' @param Kmax Maximum value of the range of the number of cluster. Default is NULL, if n >= 50, Kmax = max{50, sqrt(n)} otherwise Kmax=sqrt(n)
+#' @param EstK If \code{kmns.results} is NULL, which methodology will be used to estimated the number of groups, options are "jump" of Sugar and James (2003) and "KL" of Krzanoswki and Lai (1985)
+#' @param kernel kernel estimator to be use to estimate missclassification probabilites. Default is reciprocal inverse gaussian (RIG), other choices see \code{kcdf}.
+#' @param b Smoothing parameter to be use in the estimation of the probabilities. Default is NULL, bandwidth to be use is the one that minimize the mean integrated squared error (MISE).
+#' @param inv.roles if TRUE will use gamma kernel of Kim (2013), default is Chen 2000
+#' @param desired.ncores Desired number of cores to be used. Default is 2, however the function will determine min(detectCores(),desired.ncores)
+#' @param ret.steps If TRUE will return all the information at each step of the algorithm
+#' @param verbose If TRUE will print each step  
+#' @return A list with the following
+#' \begin{itemize}
+#' \item KmeansSoln - Return the clustering solution based on k-means. If \code{kmns.results} was NULL, then the clustering solution will be based on EstK. If provided by the user it will be the same as the input. 
+#' \item OmegaMapKmns - Overlap matrix based on the k-means solution. 
+#' \item OmegaMapKNS - Overlap matrix based on KNOB-SynC solution. 
+#' \item Ids - Cluster membership based on k-means.
+#' \item IdsMerge - Cluster membership based on KNOB-SynC.
+#' \item Groups - A list containing the Groups that were merge together.
+#' \item MaxOverlap - Maximum pairwise overlap for the KNOB-SynC Overlap matrix.
+#' \item MeanOverlap - Average pairwise overlap for the KNOB-SynC Overlap matrix.
+#' \item GenOverlap - Generalized pairwise overlap for the KNOB-SynC Overlap matrix.
+#' \item Psi - Normed residuals for the k-means solution
+#' \item Fhat - Estimation of the missclassification probability for each observation
+#' \item bw - Numeric value of the smoothing parameter. If the default was NULL, then the use estimated value is return, otherwise it returns the user input.
+#' \end{itemize}
+#' @examples 
+#' \dontrun{
+#' set.seed(787)
+#' ## Example 1
+#' data(Bullseye)
+#' oo <- KNOBSynC(x = Bullseye[,-3],verbose = TRUE)
+#' Bullseye$IdsKmeans <- oo$Ids
+#' Bullseye$IdsKNOBSynC <- oo$IdsMerge
+#' par(mfrow=c(1,3))
+#' with(Bullseye,plot(x = x,y = y, col=Ids,main="True"))
+#' with(Bullseye,plot(x = x,y = y, col=IdsKmeans,main="k-means"))
+#' with(Bullseye,plot(x = x,y = y, col=IdsKNOBSynC,main="KNOB-SynC"))
+#' ## Example 2  
+#' data(Spherical7)
+#' oo <- KNOBSynC(x = Spherical7[,-3],verbose = TRUE)
+#' Spherical7$IdsKmeans <- oo$Ids
+#' Spherical7$IdsKNOBSynC <- oo$IdsMerge
+#' par(mfrow=c(1,3))
+#' with(Spherical7,plot(x = x,y = y, col=Ids,main="True"))
+#' with(Spherical7,plot(x = x,y = y, col=IdsKmeans,main="k-means"))
+#' with(Spherical7,plot(x = x,y = y, col=IdsKNOBSynC,main="KNOB-SynC"))
+#' }
+#' @export
+##***********************************************************************************************************************************
 
 which.max.matrix <- function(mat) (which(x = mat == max(mat), arr.ind=T))
 
 is.integer0 <- function(x){is.integer(x) && length(x) == 0L}
 
-##****************************************
-## calculate generalized overlap
-##****************************************
-
-generalized.overlap <- function(overlap.mat) {
-  p <- nrow(overlap.mat)
-  if (is.null(p)) 1 else {
-    x <- eigen(overlap.mat, symmetric = TRUE, only.values = TRUE)
-    (x$values[1] - 1)/(p - 1)
-  }
-}
-
-
-norm.res <- function(X, Means, ids,desired.ncores){
-  ##******************************
-  ##
-  ## compute normed residual
-  ##
-  ##******************************
-  if((ncol(X)!=ncol(Means)) | (length(ids) !=  nrow(X)) | (nrow(Means) != max(ids))){
-    stop("Sizes do not match \n")
-  }
-  X <- as.matrix(X)
-  Means <- as.matrix(Means)
-  n <- nrow(X)
-  p <- ncol(X)
-  K <- max(ids)
-  
-  Eps <- lapply(1:n,function(z) {
-    find.nan <- which(!is.na(X[z,])); 
-    X[z,find.nan]-Means[ids[z],find.nan]}
-  )
-  
-  psi <- sapply(Eps,norm,type = "2")
-  names(psi) <- NULL
-  na.total <-  apply(X,1,function(z) sum(!is.na(z)))/p
-  psi  <- psi * na.total
-  
-  ##******************************
-  ## compute psi and pseudo psi
-  ##******************************
-  if(p > 1){
-    
-    Diff.Psi <- t(sapply(1:n,function(i) {
-      apply(t(sapply(1:K, function(k) {
-        find.nan <- which(!is.na(X[i,])); 
-        X[i,find.nan]-Means[k,find.nan]})),1,norm,type="2") * sum(!is.na(X[i,]))/p
-    }
-      ))
-    
-  } else{
-    Diff.Psi <- t(sqrt(apply(X,1,function(z) {
-      find.nan <- which(!is.na(z));
-      eps <- z[find.nan]-Means[,find.nan]
-      ##eps * eps
-       eps * eps * sum(!is.na(z))/p
-    })))
-  }
-  
-  
-  ##**************************
-  ## Compute Pseudo residuals
-  ##**************************
-  nks <- as.numeric(table(ids))
-  cl <- makeCluster(desired.ncores)
-  clusterExport(cl, list("norm","sum"))
-  pseudo.psi <- t(parSapply(cl,X = 1:n,FUN = function(i){
-    k <- ids[i]
-    Means2 <- Means
-    nk <- nks[k]
-    find.nan <- which(!is.na(X[i,]));
-    Means2[k,find.nan] <- (nk * Means[k,find.nan] - X[i,find.nan])/(nk-1)
-    sapply(1:K, function(l){
-      nl <- nks[l]
-      Means2[l,find.nan] <- (nl * Means[l,find.nan] + X[i,find.nan])/(nl+1)
-      Psi.rev <- norm(X[i,find.nan]-Means2[l,find.nan],type = "2") * sum(!is.na(X[i,]))/p
-      Psi.rev
-    })
-  }))
-  stopCluster(cl)
-
-  list(Psi = psi, PsiAll=Diff.Psi, E = Eps,PseudoPsi=pseudo.psi)
-}
-
-##KNOBSynC
-KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",  min.gen.overlap = 1e-5,
-                     kappa = NULL, b = NULL,desired.ncores=2, trueids=NULL,inv.roles=FALSE, 
+KNOBSynC <- function(x, kmns.results=NULL, min.gen.overlap = 1e-5,kappa = NULL, 
+                      Kmax = NULL,EstK=NULL,kernel = "RIG", b = NULL,inv.roles=FALSE, 
+                      desired.ncores=2, 
                      ret.steps = FALSE,verbose=FALSE,...)
 {
-  ##*************************************************************************************************************************************
-  ## X: dataset of size n x p
-  ## kmns.results: kmeans results 
-  ## nstart: number of initializations to be use along k-means. Only need it if kmns.results are not provided
-  ## kernel: kernel estimator to be use, choices are RIG (default), gamma with/without inverse roles and gaussian  
-  ## b: Bandwidth to be use, if null a estimated on the MISE will be use
-  ## trueids: if provided Adjusted Rand Index will be return for each step
-  ## inv.roles: if TRUE will use gamma kernel of Kim (2013), default is Chen 2000
-  ## kappa: multiple the generalized overlap. Complexity of merging Higher values of kappa less clusters are merge
-  ## display.overlap.mat= Display overlap matrix Maitra 2010
-  ## verbose: if TRUE will print each step  
-  ##***********************************************************************************************************************************
   X <- as.matrix(x)
   n <- nrow(X);p <- ncol(X)
   if(verbose){
@@ -170,11 +98,10 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
     }
   }  else{
     if(verbose){
-      cat("k-means solution was provided.  \n")
+      cat("k-means solution was provided.\n")
     }
     Means <- kmns.results$centers
     ids <- kmns.results$cluster
-    wss <- kmns.results$tot.withinss
     K <- max(unique(ids))
   }
   
@@ -210,11 +137,10 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
   residuals.norm <- norm.res(X = X, Means = Means, ids = ids,desired.ncores=desired.ncores)
   
   psi <- residuals.norm$Psi 
-  pseudo.psi <- residuals.norm$PsiAll
-  psi.rev <- residuals.norm$PseudoPsi
+  pseudo.psi <- residuals.norm$PseudoPsi
   
   ## minimum generazid overlap
-##  min.gen.overlap <- 1/prod(dim(X))
+  ##  min.gen.overlap <- 1/prod(dim(X))
   ##*************************************
   ##
   ## Choice of the kernel to estimate
@@ -225,16 +151,16 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
     cat("Estimating the missclasification probabilities using kernel estimation.\n")
   }
   if(is.null(b)){
-    b <- gsl_bw_mise_cdf((psi*psi/(wss/(p*(n-K)))))
+    b <- gsl_bw_mise_cdf((psi*psi/(sum(psi*psi)/(p*(n-K)))))
   }
-
+  
   cl <- makeCluster(desired.ncores,...)
   clusterExport(cl, list("kcdf"))
   Fhat.Psi <- t(parApply(cl = cl,X = pseudo.psi,MARGIN = 1,FUN = function(z){kcdf(x = psi,b = b,kernel=kernel,
-                                                                               xgrid=z,inv.roles=inv.roles)$Fhat}))
+                                                                                  xgrid=z,inv.roles=inv.roles)$Fhat}))
   stopCluster(cl)
   
-    
+  
   ##*********************************
   ##
   ## compute \hat{omega}_{kl}
@@ -266,11 +192,6 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
   ##
   ##***************************************************
   
-  if(!is.null(trueids)){
-    ar <- rep(0,K)
-    ar[iter] <- RandIndex(id1=trueids,id2=ids)$AR
-  }
-  
   idsMerge <- ids
   Kmerge <- K
   Kstep[iter] <- Kmerge
@@ -294,21 +215,12 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
       cat(sprintf("|Iteration |  K  |  Max Overlap  | Mean Overlap |  Generalized Overlap \t| \n"))
       cat(sprintf("| %d \t   | %d  |  %.6f \t |  %.6f \t|  %.6f \t        |\n",iter,Kmerge,max.overlap[iter],mean.overlap[iter],gen.overlap[iter]))
     }
-    if(!is.null(trueids)){
-      knob.sync.kappa <- list(KmeansSoln = kmns.results,OmegaMapKmns = Omega.lk, OmegaMapKNS=Omega.lk.merge,Ids = ids, IdsMerge = idsMerge, StepGroups = Groups.step,
-                              Groups = GG, MaxOverlap=max.overlap[1:iter],MeanOverlap = mean.overlap[1:iter], GenOverlap = gen.overlap[1:(iter)],Psi=psi, Fhat = Fhat.Psi, AR= ar[1:iter],bw = b)
-    } else{
-      knob.sync.kappa <- list(KmeansSoln = kmns.results,OmegaMapKmns = Omega.lk, OmegaMapKNS=Omega.lk.merge,Ids = ids, IdsMerge = idsMerge, StepGroups = Groups.step,
+    knob.sync.kappa <- list(KmeansSoln = kmns.results,OmegaMapKmns = Omega.lk, OmegaMapKNS=Omega.lk.merge,Ids = ids, IdsMerge = idsMerge, StepGroups = Groups.step,
                               Groups = GG, MaxOverlap=max.overlap[1:iter],MeanOverlap = mean.overlap[1:iter], GenOverlap = gen.overlap[1:(iter)],Psi=psi, Fhat = Fhat.Psi,bw = b)
-    }
+    
     Kmerge <- max(unique(knob.sync.kappa$IdsMerge))
     if(verbose){
-      if(!is.null(trueids)){
-        ar <- knob.sync.kappa$AR[length(knob.sync.kappa$AR)]
-        cat("C =", Kmerge,"\nAdjusted Rand Index =", ar, "\n") 
-      } else{
-        cat("C =", Kmerge,"\n") 
-      }
+      cat("C =", Kmerge,"\n") 
       cat(paste("#",paste(rep("=",100),collapse=""),"#\n",sep=""))
     }
     knob.sync.kappa
@@ -447,9 +359,6 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
         if(verbose){
           cat(sprintf("| %d \t   | %d  |  %.6f \t |  %.6f \t|  %.6f \t        |\n",iter,Kmerge,max.overlap[iter],mean.overlap[iter],gen.overlap[iter]))
         }
-        if(!is.null(trueids)){
-          ar[iter] <- RandIndex(id1=trueids,id2=idsMerge)$AR
-        }
         Groups.step[[iter]] <- GG
         Ids.step[[iter]] <- idsMerge 
         while((max.overlap[iter] > kappa*gen.overlap[iter]) & (gen.overlap[iter] > min.gen.overlap) & (gen.overlap[iter] <= gen.overlap[iter-1])) {
@@ -526,26 +435,26 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
               max.overlap[iter] <- 1 ## compute maximum overlap
               mean.overlap[iter] <- 1 ## compute mean overlap            
             } else{
-            for(k in 1:(Kmerge-1)){
-              for(l in (k+1):(Kmerge)){
-                ids.of.GG <- GG[[l]]
-                nk <- length(ids.of.GG)
-                max.omega.gg <- rep(0,nk)
-                for(j in 1:nk){
-                  max.omega.gg[j] <- (1-mean(apply(as.matrix(Fhat.Psi[ids == ids.of.GG[j],GG[[k]]]),1,min)))^nk
+              for(k in 1:(Kmerge-1)){
+                for(l in (k+1):(Kmerge)){
+                  ids.of.GG <- GG[[l]]
+                  nk <- length(ids.of.GG)
+                  max.omega.gg <- rep(0,nk)
+                  for(j in 1:nk){
+                    max.omega.gg[j] <- (1-mean(apply(as.matrix(Fhat.Psi[ids == ids.of.GG[j],GG[[k]]]),1,min)))^nk
+                  }
+                  Omega.lk.merge[k,l] <- max(max.omega.gg)
                 }
-                Omega.lk.merge[k,l] <- max(max.omega.gg)
               }
-            }
-            
-            iter <- iter+1
-            Kstep[iter] <- Kmerge
-            omega.mat <- Omega.lk.merge
-            Omega <- (t(omega.mat) + (omega.mat))
-            diag(Omega) <- 1
-            gen.overlap[iter] <- generalized.overlap(overlap.mat = Omega) ## compute generalized overlap
-            max.overlap[iter] <- max(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)]) ## compute maximum overlap
-            mean.overlap[iter] <- mean(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)]) ## compute mean overlap
+              
+              iter <- iter+1
+              Kstep[iter] <- Kmerge
+              omega.mat <- Omega.lk.merge
+              Omega <- (t(omega.mat) + (omega.mat))
+              diag(Omega) <- 1
+              gen.overlap[iter] <- generalized.overlap(overlap.mat = Omega) ## compute generalized overlap
+              max.overlap[iter] <- max(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)]) ## compute maximum overlap
+              mean.overlap[iter] <- mean(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)]) ## compute mean overlap
             }
             Groups.step[[iter]] <- GG
             Ids.step[[iter]] <- idsMerge 
@@ -553,37 +462,12 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
               cat(sprintf("| %d \t   | %d  |  %.6f \t |  %.6f \t|  %.6f \t        |\n",iter,Kmerge,max.overlap[iter],mean.overlap[iter],gen.overlap[iter]))
               
             }
-            if(!is.null(trueids)){
-              ar[iter] <- RandIndex(id1=trueids,id2=idsMerge)$AR
-            }
           } else{
             break;
           }
         }
       }
       
-      if(!is.null(trueids)){
-        ##********************************
-        ## Return with Adjusted Rand Index
-        ##********************************
-        Omega.lk2 <- Omega.lk
-        Omega.lk2 <- Omega.lk2+ t(Omega.lk2)
-        diag(Omega.lk2) <- 1
-        
-        Omega.lk2.merge <- Omega.lk.merge
-        Omega.lk2.merge <- Omega.lk2.merge+ t(Omega.lk2.merge)
-        diag(Omega.lk2.merge) <- 1
-        
-        if(ret.steps){
-          knob.sync.kappa[[kappa]] <- list(KmeansSoln = kmns.results,OmegaMapKmns = Omega.lk2, OmegaMapKNS=Omega.lk2.merge,Ids = ids, IdsMerge = idsMerge,IdsStep =   Ids.step, GroupsStep = Groups.step,
-                                           Groups = GG, MaxOverlap=max.overlap[1:iter],MeanOverlap = mean.overlap[1:iter], GenOverlap = gen.overlap[1:(iter)],
-                                           Psi=psi, Fhat = Fhat.Psi, AR= ar[1:iter],bw = b)
-        } else{
-          knob.sync.kappa[[kappa]] <- list(KmeansSoln = kmns.results,OmegaMapKmns = Omega.lk2, OmegaMapKNS=Omega.lk2.merge,Ids = ids, IdsMerge = idsMerge, 
-                                           Groups = GG, MaxOverlap=max.overlap[1:iter],MeanOverlap = mean.overlap[1:iter], GenOverlap = gen.overlap[1:(iter)],
-                                           Psi=psi, Fhat = Fhat.Psi, AR= ar[1:iter],bw = b)
-        }
-      } else{
         Omega.lk2 <- Omega.lk
         Omega.lk2 <- Omega.lk2+ t(Omega.lk2)
         diag(Omega.lk2) <- 1
@@ -592,8 +476,8 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
         Omega.lk2.merge <- Omega.lk2.merge+ t(Omega.lk2.merge)
         diag(Omega.lk2.merge) <- 1
         if(ret.steps){
-            names(Groups.step) <- paste("Step",1:iter,sep="")
-            names(Ids.step) <- paste("Step",1:iter,sep="")
+          names(Groups.step) <- paste("Step",1:iter,sep="")
+          names(Ids.step) <- paste("Step",1:iter,sep="")
           knob.sync.kappa[[kappa]] <- list(KmeansSoln = kmns.results,OmegaMapKmns = Omega.lk2,
                                            OmegaMapKNS=Omega.lk2.merge,Ids = ids, IdsMerge = idsMerge, 
                                            GroupsStep = Groups.step,  IdsStep = Ids.step,
@@ -610,7 +494,6 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
                                            Psi=psi, Fhat = Fhat.Psi, bw = b)
         }
       }
-    }
     ##
     ## choose best kappa solution by
     ## finding the minimum generalized overlap
@@ -622,14 +505,9 @@ KNOBSynC <- function(x, kmns.results=NULL, Kmax = NULL,EstK=NULL,kernel = "RIG",
     }
     Kmerge <- max(unique(knob.sync.kappa[[kappa.min]]$IdsMerge))
     if(verbose){
-      if(!is.null(trueids)){
-        ar <- knob.sync.kappa[[kappa.min]]$AR[length(knob.sync.kappa[[kappa.min]]$AR)]
-        cat("C =", Kmerge,"\nAdjusted Rand Index =", ar, "\n") 
-      } else{
         cat("C =", Kmerge,"\n") 
       }
       cat(paste("#",paste(rep("=",100),collapse=""),"#\n",sep=""))
     }
     knob.sync.kappa[[kappa.min]]
   }
-}

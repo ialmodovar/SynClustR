@@ -27,3 +27,4 @@ importFrom("grDevices", "dev.copy2pdf", "dev.off")
 importFrom("stats", "as.dist", "heatmap", "pchisq", "pnorm", "sd")
 
 useDynLib(SynClustR, .registration = TRUE, .fixes= "C_")
+

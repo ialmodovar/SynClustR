@@ -3,10 +3,9 @@ citHeader("To cite SynClustR in a publication use:")
 citEntry(
   entry = "Misc",
   title = "{SynClustR}: Syncytial Clustering Algorithms in R",
-  author = personList(as.person("Israel Almodovar-Rivera"),
-                      as.person("Ranjan Maitra")),
-  year = "2020",
+  author = personList(as.person("Israel Almodovar-Rivera")),
+  year = "2021",
   note = "{R} Package, URL http://github.com/ialmodovar/SynClustR",
-  textVersion = "Almodovar-Rivera, I., Maitra, R. (2020) SynClustR: Syncytial Clustering Algorithms in R. R Package, URL http://github.com/ialmodovar/SynClustR",
+  textVersion = "Almodovar-Rivera, I., Maitra, R.(2021) SynClustR: Syncytial Clustering Algorithms in R. R Package, URL http://github.com/ialmodovar/SynClustR",
   key = "AlmodovarRivera20SynClustR"
 )
