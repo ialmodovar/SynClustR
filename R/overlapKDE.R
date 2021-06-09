@@ -15,6 +15,7 @@
 overlapKDE <- function(X,Means, ids, b = NULL,kernel = "RIG",inv.roles = FALSE,desired.ncores=2)
 {
   
+  X <- as.matrix(X)
   n <- nrow(X)
   p <- ncol(X)
   K <- max(ids)
@@ -23,14 +24,13 @@ overlapKDE <- function(X,Means, ids, b = NULL,kernel = "RIG",inv.roles = FALSE,d
   
   residuals.norm <- norm.res(X = X, Means = Means, ids = ids,desired.ncores = desired.ncores)
   psi <- residuals.norm$Psi
-  psi.all <- residuals.norm$PsiAll
   psi.pseudo <- residuals.norm$PseudoPsi
   
   if(is.null(b)){
     wss <- sum(psi * psi)
     b <- gsl_bw_mise_cdf((psi*psi/(wss/(p*(n-K)))))   
   }
-  Fhat.Psi <- t(apply(psi.all,1,function(z){kcdf(x = psi,b = b,kernel=kernel,xgrid=z,inv.roles=inv.roles)$Fhat}))
+  Fhat.Psi <- t(apply(psi.pseudo,1,function(z){kcdf(x = psi,b = b,kernel=kernel,xgrid=z,inv.roles=inv.roles)$Fhat}))
   
   Omega.lk <- array(0,dim=c(K,K))
   for(k in 1:K){
