@@ -27,7 +27,7 @@ overlapKDE <- function(X,Means, ids, b = NULL,kernel = "RIG",inv.roles = FALSE,d
   psi.pseudo <- residuals.norm$PseudoPsi
   
   if(is.null(b)){
-    wss <- psi * psi
+    wss <- sum(psi * psi)
     b <- gsl_bw_mise_cdf((psi*psi/(wss/(p*(n-K)))))   
   }
   Fhat.Psi <- t(apply(psi.all,1,function(z){kcdf(x = psi,b = b,kernel=kernel,xgrid=z,inv.roles=inv.roles)$Fhat}))
