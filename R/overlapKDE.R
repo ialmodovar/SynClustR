@@ -10,6 +10,14 @@
 #' @param inv.roles inverse roles of the gamma kernel
 #' @param desired.ncores number of desired cores
 #' 
+#' @examples 
+#' 
+#' data("iris", package = "datasets")
+#' id <- as.integer(iris[, 5])
+#' #estimate mixture parameters
+#' Mu <- t(sapply(1:K, function(k){ colMeans(iris[id == k, -5]) }))
+#' overlapKDE(X = iris[,-5], Means = Mu,ids = id)
+#' 
 #' @export
 #' 
 overlapKDE <- function(X,Means, ids, b = NULL,kernel = "RIG",inv.roles = FALSE,desired.ncores=2)
@@ -33,15 +41,20 @@ overlapKDE <- function(X,Means, ids, b = NULL,kernel = "RIG",inv.roles = FALSE,d
   Fhat.Psi <- t(apply(psi.pseudo,1,function(z){kcdf(x = psi,b = b,kernel=kernel,xgrid=z,inv.roles=inv.roles)$Fhat}))
   
   Omega.lk <- array(0,dim=c(K,K))
+  ## Return \hat Omega _{l|k}
   for(k in 1:K){
     for(l in k:K){
-      Omega.lk[k,l] <- Omega.lk[l,k] <- 1-mean(Fhat.Psi[ids==k,l])+1-mean(Fhat.Psi[ids==l,k])
+      Omega.lk[l,k] <-  1-mean(Fhat.Psi[ids==k,l])
     }
   }
   diag(Omega.lk) <- 1
-  list(Omega = Omega.lk,
-       MaxOverlapKDE = max(Omega.lk[!lower.tri(Omega.lk,diag = TRUE)]),
-       MeanOverlapKDE = mean(Omega.lk[!lower.tri(Omega.lk,diag = TRUE)]),
-       GenOverlapKDE = generalized.overlap(Omega.lk))
+  Omega <- (t(Omega.lk)+Omega.lk)/2
+  list(Omega = Omega,
+       OmegaConditional = Omega.lk,
+       MaxOverlapKDE = max(Omega[!lower.tri(Omega,diag = TRUE)]),
+       MeanOverlapKDE = mean(Omega[!lower.tri(Omega,diag = TRUE)]),
+       GenOverlapKDE = generalized.overlap(Omega))
 }
+
+
 
