@@ -2,7 +2,7 @@
 Syncytial Clustering Algorithms in R
 
 ## Authors:
-Israel Almodovar-Rivera and Ranjan Maitra
+Israel Almodóvar-Rivera and Ranjan Maitra
 
 ## Installation
 
@@ -21,4 +21,7 @@ library("devtools")
 install_github("ialmodovar/SynClustR")
 ```
 
+## Reference
+
+Almodóvar-Rivera, I., & Maitra, R. (2020). Kernel-estimated Nonparametric Overlap-Based Syncytial Clustering. J. Mach. Learn. Res., 21, 122-1.
 
