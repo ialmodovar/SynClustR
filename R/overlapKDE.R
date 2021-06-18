@@ -5,7 +5,7 @@
 #' @param X dataset of size n x p
 #' @param Means clusters centroids (means)
 #' @param ids cluster memberships
-#' @param b smoothing parameter
+#' @param b smoothing parameter. 
 #' @param kernel choice of the kernel
 #' @param inv.roles inverse roles of the gamma kernel
 #' @param desired.ncores number of desired cores
@@ -28,12 +28,14 @@
 #' 
 #' data("iris", package = "datasets")
 #' id <- as.integer(iris[, 5])
+#' K <- max(id)
 #' Mu <- t(sapply(1:K, function(k){ colMeans(iris[id == k, -5]) }))
 #' overlapKDE(X = iris[,-5], Means = Mu,ids = id)
-#' 
+#' ## using a bandwidth given by user
+#' overlapKDE(X = iris[,-5], Means = Mu,ids = id,b=0.01)
 #' @export
 #' 
-overlapKDE <- function(X,Means, ids, b = NULL,kernel = "RIG",inv.roles = FALSE,desired.ncores=2)
+overlapKDE <- function(X, Means, ids, b = NULL, kernel = "RIG", inv.roles = FALSE, desired.ncores=2)
 {
   
   X <- as.matrix(X)
@@ -51,14 +53,14 @@ overlapKDE <- function(X,Means, ids, b = NULL,kernel = "RIG",inv.roles = FALSE,d
   
   if(is.null(b)){
     wss <- sum(psi * psi)
-    b <- gsl_bw_mise_cdf((psi*psi/(wss/(p*(n-K)))))   
+    b <- min(gsl_bw_mise_cdf((psi*psi/(wss/(p*(n-K))))), 0.5/(n*p))  
   }
-  Fhat.Psi <- t(apply(psi.pseudo,1,function(z){kcdf(x = psi,b = b,kernel=kernel,xgrid=z,inv.roles=inv.roles)$Fhat}))
-  
+  Fhat.Psi <- t(apply(psi.pseudo,1,function(z){kcdf(x = psi,xgrid=z,b = b,kernel=kernel,inv.roles=inv.roles)$Fhat}))
+
   Omega.lk <- array(0,dim=c(K,K))
   ## Compute \hat Omega _{l|k}
   for(k in 1:K){
-    for(l in k:K){
+    for(l in 1:K){
       Omega.lk[l,k] <-  1-mean(Fhat.Psi[ids==k,l])
     }
   }

@@ -180,6 +180,12 @@ KNOBSynC <- function(x, kmns.results=NULL, min.gen.overlap = 1e-5,kappa = NULL,
       Omega.lk[k,l] <- 1-mean(Fhat.Psi[ids==k,l]) ## Omega_{l|k}
     }
   }
+
+  # for(k in 1:K){
+  #   for(l in 1:K){
+  #     Omega.lk[k,l] <- 1-mean(Fhat.Psi[ids==k,l]) ## Omega_{l|k}
+  #   }
+  # }
   
   omega.mat <- Omega.lk
   Omega <- (t(omega.mat) + (omega.mat))
@@ -200,11 +206,10 @@ KNOBSynC <- function(x, kmns.results=NULL, min.gen.overlap = 1e-5,kappa = NULL,
   Omega.initial.merge <- Omega.lk.merge
   GG <- list()
   gen.overlap[iter] <- generalized.overlap(overlap.mat = Omega)
-  max.overlap[iter] <- max(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)])
-  mean.overlap[iter] <- mean(Omega.lk.merge[!lower.tri(Omega.lk.merge,diag = TRUE)])
+  max.overlap[iter] <- max(Omega[!lower.tri(Omega,diag = TRUE)])
+  mean.overlap[iter] <- mean(Omega[!lower.tri(Omega,diag = TRUE)])
   Groups.step[[iter]] <- GG
   Ids.step[[iter]] <- idsMerge 
-  
   ##************************************************************************************
   ## If the generalized overlap for the k-means clustering is very low, there's not need to merge them.
   ## Forcing them to merge will create unstable clustering.
@@ -223,7 +228,7 @@ KNOBSynC <- function(x, kmns.results=NULL, min.gen.overlap = 1e-5,kappa = NULL,
       cat("C =", Kmerge,"\n") 
       cat(paste("#",paste(rep("=",100),collapse=""),"#\n",sep=""))
     }
-    knob.sync.kappa
+    return(knob.sync.kappa)
     
   } else {
     
