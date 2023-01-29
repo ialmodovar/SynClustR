@@ -10,7 +10,7 @@ SynClustR requires
 
 ```
 - R version 3.5.0 or higher.
-- R packages: abind, foreach, parallel, doParallel.
+- R packages: abind, foreach, parallel, doParallel, and parallelly.
 - GSL - GNU Scientific Library
 ```
 
