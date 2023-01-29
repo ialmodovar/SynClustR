@@ -133,7 +133,7 @@ KNOBSynC <- function(x, kmns.results=NULL, min.gen.overlap = 1e-5,kappa = NULL,
   if(verbose){
     cat("Computing normed residuals and pseudo-normed residuals. \n")
   }
-  desired.ncores <- min(detectCores(),desired.ncores)
+  desired.ncores <- max(availableCores(),desired.ncores)
   residuals.norm <- norm.res(X = X, Means = Means, ids = ids,desired.ncores=desired.ncores)
   
   psi <- residuals.norm$Psi 

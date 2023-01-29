@@ -19,7 +19,7 @@
 #' @export
 ##***********************************************************************************************************************************
 
-norm.res <- function (X, Means, ids, desired.ncores = max(availableCores(),2)) 
+norm.res <- function (X, Means, ids, desired.ncores = min(availableCores(),2)) 
 {
   if ((ncol(X) != ncol(Means)) | (length(ids) != nrow(X)) | 
       (nrow(Means) != max(ids))) {

@@ -18,6 +18,7 @@ import(abind)
 import(foreach)
 import(parallel)
 import(doParallel)
+import(parallelly)
 
 importFrom("graphics", "axis", "frame", "image", "layout", "lines",
              "par", "plot.new", "plot.window", "rect", "text")

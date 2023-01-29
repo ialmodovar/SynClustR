@@ -15,11 +15,9 @@
 ## email: maitra@iastate.edu
 ##
 ## Israel Almodovar-Rivera, PhD                       
-## University of Puerto Rico                          
-## Medical Science Campus                             
-## Graduate School of Public Health                   
-## Department of Biostatistics and Epidemiology       
-## San Juan, PR, USA 00953
+## University of Puerto Rico at Mayaguez                          
+## Department of Mathematical Sciences       
+## Mayaguez, PR, USA 00680
 ## email: israel.almodovar@upr.edu
 ##******************************************************
 
@@ -31,7 +29,7 @@ kmns.all.soln <- function(k, x, x.hc, nstarts, h.c = TRUE) {
     if (h.c) {
       cl <- cutree(x.hc, k = k)
       x.df <- data.frame(x = x, cl = as.factor(cl))
-      km.center <- as.matrix(aggregate(formula = . ~ cl, FUN  = mean, data = x.df)[,-1])
+      km.center <- as.matrix(aggregate( . ~ cl, FUN  = mean, data = x.df)[,-1])
       km1 <- kmeans(x, centers = km.center, iter.max = 100)
       km2 <- kmeans(x, centers = k, iter.max = 100, nstart =  nstarts * k)
       if (km1$tot.withins < km2$tot.withinss)
@@ -63,7 +61,7 @@ kmeans.all <- function(x, maxclus, nstarts = prod(dim(x)),desired.ncores = 2, h.
     
     x.hc <- hclust(dist(x), method = "ward.D2")
     
-    desired.ncores <- min(detectCores(),desired.ncores)
+    desired.ncores <- max(availableCores(),desired.ncores)
     
     cl <- makeCluster(desired.ncores,...)
     clusterExport(cl, list("kmns.all.soln"))
