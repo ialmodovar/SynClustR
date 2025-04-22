@@ -1,3 +1,4 @@
+
 ##*************************************************************************************************************************************
 #' normed.residuals
 #' 
@@ -18,6 +19,7 @@
 #' @examples 
 #' @export
 ##***********************************************************************************************************************************
+
 
 norm.res <- function (X, Means, ids, desired.ncores = max(availableCores(),2)) 
 {
@@ -55,10 +57,11 @@ norm.res <- function (X, Means, ids, desired.ncores = max(availableCores(),2))
       }
     }))
   } else {
-    Diff.Psi <- t(sqrt(apply(X, 1, function(z) {
-      find.nan <- which(!is.na(z))
-      eps <- z[find.nan] - Means[, find.nan]
-      eps * eps * wgt[i]
+    Diff.Psi <- sqrt(t(sapply(1:n,function(i){
+      sapply(1:K,function(k){
+        eps <- X[i,]-Means[k,]
+        eps*eps
+      })
     })))
   }
   nks <- as.numeric(table(ids))
@@ -66,7 +69,7 @@ norm.res <- function (X, Means, ids, desired.ncores = max(availableCores(),2))
   ## in Almodovar-Rivera and Maitra (2020)
   cl <- makeCluster(desired.ncores)
   clusterExport(cl, list("norm", "sum"))
-  pseudo.psi <- t(parSapply(cl, X = 1:n, FUN = function(i) {
+  pseudo.psi <- t(parSapply(cl, 1:n, FUN = function(i) {
     k <- ids[i]
     Means2 <- Means
     nk <- nks[k]
