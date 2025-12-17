@@ -51,10 +51,6 @@ overlapKDE <- function(X, Means, ids, b = NULL, kernel = "RIG", inv.roles = FALS
   psi <- residuals.norm$Psi
   psi.pseudo <- residuals.norm$PseudoPsi
   
-  if(is.null(b)){
-    wss <- sum(psi * psi)
-    b <- min(gsl_bw_mise_cdf((psi*psi/(wss/(p*(n-K))))), 0.5/(n*p))  
-  }
   Fhat.Psi <- t(apply(psi.pseudo,1,function(z){kcdf(x = psi,xgrid=z,b = b,kernel=kernel,inv.roles=inv.roles)$Fhat}))
 
   Omega.lk <- array(0,dim=c(K,K))
