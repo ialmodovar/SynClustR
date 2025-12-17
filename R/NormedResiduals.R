@@ -86,5 +86,5 @@ norm.res <- function (X, Means, ids, desired.ncores = max(availableCores(),2))
     })
   }))
   stopCluster(cl)
-  list(Psi = psi, E = Eps, PseudoPsi = Diff.Psi)
+  list(Psi = psi, E = Eps, PseudoPsi = pseudo.psi)
 }
