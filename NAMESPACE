@@ -11,6 +11,7 @@ export("KNOBSynC")
 export("kmeans.all")
 export("kmns.all.soln")
 export("overlap.map")
+export("overlapKDE")
 export("norm.res")
 export("kmH")
 
