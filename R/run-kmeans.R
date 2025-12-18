@@ -75,7 +75,7 @@ kmeans.all <- function(x, maxclus, nstarts = prod(dim(x)),desired.ncores = 2, h.
     jump.stat <- sapply(1:maxclus, FUN = jump, dstrtn = kmns.dstrtn, x = x)
     kl.stat <- sapply(1:(maxclus-1),FUN = KL, res = kmns.results,x = x)
     
-    list(kmns.results = kmns.results, distortions = kmns.dstrtn, jump.stat = jump.stat,
+    list(kmns.results = kmns.results, jump.stat = jump.stat,
          kl.stat = kl.stat, Khat.jump = which.max(jump.stat),Khat.KL = which.max(kl.stat))
 
 }
