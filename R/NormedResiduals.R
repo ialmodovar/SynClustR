@@ -78,13 +78,11 @@ norm.res <- function (X, Means, ids, desired.ncores = max(availableCores(),2))
     Means2[k, find.nan] <- (nk * Means[k, find.nan] - X[i, find.nan])/(nk - 1)
     sapply(1:K, function(l) {
       nl <- nks[l]
-      Means2[l, find.nan] <- (nl * Means[l, find.nan] + 
-                                X[i, find.nan])/(nl + 1)
-      Psi.rev <- norm(X[i, find.nan] - Means2[l, find.nan], 
-                      type = "2") * wgt[i]
+      Means2[l, find.nan] <- (nl * Means[l, find.nan] + X[i, find.nan])/(nl + 1)
+      Psi.rev <- norm(X[i, find.nan] - Means2[l, find.nan], type = "2") * wgt[i]
       Psi.rev
     })
   }))
   stopCluster(cl)
-  list(Psi = psi, E = Eps, PseudoPsi = pseudo.psi)
+  list(Psi = psi, E = Eps, PseudoPsi = Diff.Psi)
 }
