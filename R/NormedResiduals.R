@@ -65,7 +65,7 @@ norm.res <- function (X, Means, ids, desired.ncores = max(availableCores(),2))
     })))
   }
   nks <- as.numeric(table(ids))
-  ## compute pseudo normed residuals as defined 
+  ## compute pseudo-normed residuals as defined 
   ## in Almodovar-Rivera and Maitra (2020)
   cl <- makeCluster(desired.ncores)
   clusterExport(cl, list("norm", "sum"))
@@ -74,7 +74,7 @@ norm.res <- function (X, Means, ids, desired.ncores = max(availableCores(),2))
     Means2 <- Means
     nk <- nks[k]
     find.nan <- which(!is.na(X[i, ]))
-    ## if dimension avaible  is one
+    ## if dimension available  is one
     Means2[k, find.nan] <- (nk * Means[k, find.nan] - X[i, find.nan])/(nk - 1)
     sapply(1:K, function(l) {
       nl <- nks[l]
@@ -86,5 +86,5 @@ norm.res <- function (X, Means, ids, desired.ncores = max(availableCores(),2))
     })
   }))
   stopCluster(cl)
-  list(Psi = psi, E = Eps, PseudoPsi = Diff.Psi)
+  list(Psi = psi, E = Eps, PseudoPsi = pseudo.psi)
 }
